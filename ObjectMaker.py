@@ -1,23 +1,13 @@
-import yaml
-import json
-import os
-import sys
-import requests
-import sys
-import subprocess
-import shutil
-import tkinter as tk
-import customtkinter as ctk
-from calendar import Calendar
-from datetime import datetime
-from tkcalendar import Calendar
-from pathlib import Path
+import yaml, json, os, sys, requests, subprocess, shutil, tkinter as tk, customtkinter as ctk
 from appdirs import user_config_dir
-from tkinter import ttk
+from calendar import Calendar
 from ctypes import windll
-from tkinter import filedialog
+from datetime import datetime
+from pathlib import Path
+from tkcalendar import Calendar
+from tkinter import ttk, filedialog
 
-VERSION = "v1.0.1"
+VERSION = "v1.0.2"
 RELEASE_URL = "https://api.github.com/repos/lYants/News-and-event-maker/releases/latest"
 
 DEFAULT_FONT = ("Sabon", 18)
@@ -131,7 +121,8 @@ class Gui:
             "source",
             os.path.join(base_path, "styles", "forest-light.tcl"),
         )
-        ttk.Style().theme_use("forest-light")
+        self.style = ttk.Style()
+        self.style.theme_use("forest-light")
         self.root.title("Object maker")
         self.root.geometry("1800x775")
         windll.shcore.SetProcessDpiAwareness(1)
@@ -147,8 +138,7 @@ class Gui:
         sep = ttk.Separator(self.mainframe, orient="vertical")
         sep.grid(row=0, column=4, rowspan=12, sticky="ns", padx=20)
 
-        s = ttk.Style()
-        s.configure(".", font=("Sabon", 18))
+        self.style.configure(".", font=("Sabon", 18))
 
         self.maker = objectmaker
         self.makeMenuBar()
@@ -254,23 +244,23 @@ class Gui:
         frame.grid(column=5, row=0, columnspan=5, sticky="news", padx=20)
         ctk.CTkButton(
             frame,
-            text="Bold",
+            text="bold",
             fg_color="black",
             text_color="white",
             hover_color="#222222",
-            font=("Sabon", 12, "bold"),
+            font=("Sabon", 14, "bold"),
             corner_radius=10,
             width=15,
             height=10,
             command=self.makeTextBold,
-        ).pack(side="left")
+        ).pack(side="left", padx=10)
         ctk.CTkButton(
             frame,
-            text="Italic",
+            text="italic",
             fg_color="black",
             text_color="white",
             hover_color="#222222",
-            font=("Sabon", 12, "italic"),
+            font=("Sabon", 14, "italic"),
             corner_radius=10,
             width=15,
             height=10,
@@ -278,11 +268,11 @@ class Gui:
         ).pack(side="left", padx=10)
         ctk.CTkButton(
             frame,
-            text="Insert image",
+            text="insert image",
             fg_color="black",
             text_color="white",
             hover_color="#222222",
-            font=("Sabon", 12, "italic"),
+            font=("Sabon", 14),
             corner_radius=10,
             width=15,
             height=10,
@@ -290,15 +280,27 @@ class Gui:
         ).pack(side="left", padx=10)
         ctk.CTkButton(
             frame,
-            text="Insert weblink",
+            text="insert weblink",
             fg_color="black",
             text_color="white",
             hover_color="#222222",
-            font=("Sabon", 12, "italic"),
+            font=("Sabon", 14),
             corner_radius=10,
             width=15,
             height=10,
             command=self.insertLink,
+        ).pack(side="left", padx=10)
+        ctk.CTkButton(
+            frame,
+            text="insert break",
+            fg_color="black",
+            text_color="white",
+            hover_color="#222222",
+            font=("Sabon", 14),
+            corner_radius=10,
+            width=15,
+            height=10,
+            command=self.insertBreak,
         ).pack(side="left", padx=10)
 
     def updateObjectType(self):
@@ -376,6 +378,7 @@ class Gui:
             startTimeFrame, from_=0, to=23, increment=1, font=DEFAULT_FONT, width=3
         )
         self.startTimeH.pack(side="left")
+        self.startTimeH.set(12)
 
         ttk.Label(startTimeFrame, text=":", font=DEFAULT_FONT).pack(side="left")
 
@@ -383,6 +386,7 @@ class Gui:
             startTimeFrame, from_=0, to=45, increment=15, font=DEFAULT_FONT, width=3
         )
         self.startTimeM.pack(side="right")
+        self.startTimeM.set(00)
 
         # End date
         self.formattedEndDate = ""
@@ -412,6 +416,7 @@ class Gui:
             endTimeFrame, from_=0, to=23, increment=1, font=DEFAULT_FONT, width=3
         )
         self.endTimeH.pack(side="left")
+        self.endTimeH.set(12)
 
         ttk.Label(endTimeFrame, text=":", font=DEFAULT_FONT).pack(side="left")
 
@@ -419,6 +424,7 @@ class Gui:
             endTimeFrame, from_=0, to=45, increment=15, font=DEFAULT_FONT, width=3
         )
         self.endTimeM.pack(side="right")
+        self.endTimeM.set(00)
 
         # Location
         locationLabel = ttk.Label(self.mainframe, text="Location:", font=DEFAULT_FONT)
@@ -495,18 +501,32 @@ class Gui:
             self.month = datetime.now().month
         if not self.year:
             self.year = datetime.now().year
+
+        startHour = self.startTimeH.get()
+        startMinute = self.startTimeM.get()
+        endHour = self.endTimeH.get()
+        endMinute = self.endTimeM.get()
+
+        if len(startHour) == 1:
+            startHour = '0' + startHour
+        if len(startMinute) == 1:
+            startMinute = '0' + startMinute
+        if len(endHour) == 1:
+            endHour = '0' + endHour
+        if len(endMinute) == 1:
+            endMinute = '0' + endMinute
         object = Event(
             title=self.title.get(),
             date=self.formattedDate
             + "T"
-            + self.startTimeH.get()
+            + startHour
             + ":"
-            + self.startTimeM.get(),
+            + startMinute,
             enddate=self.formattedEndDate
             + "T"
-            + self.endTimeH.get()
+            + endHour
             + ":"
-            + self.endTimeM.get(),
+            + endMinute,
             language=self.language.get(),
             anchor=self.anchor.get(),
             category=image,
@@ -628,6 +648,9 @@ class Gui:
 
     def insertLink(self):
         self.textEditor.insert("insert", "[ link_description ]( link )")
+
+    def insertBreak(self):
+        self.textEditor.insert("insert","<br>")
 
     def removeHighlight(self, event):
         event.widget.selection_clear()
