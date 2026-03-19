@@ -8,7 +8,7 @@ from tkcalendar import Calendar
 from tkinter import ttk, filedialog
 
 VERSION = "v1.0.2"
-RELEASE_URL = "https://api.github.com/repos/lYants/News-and-event-maker/releases/latest"
+RELEASE_URL = "https://api.github.com/repos/YenteP/News-and-event-maker/releases/latest"
 
 DEFAULT_FONT = ("Sabon", 18)
 OBJECT_CHOICES = ("news", "event")
@@ -155,7 +155,7 @@ class Gui:
     def makeMenuBar(self):
         self.menu = tk.Menu(self.root)
         self.menu.add_command(
-            label="Select Dwengo-website folder", command=self.getWebsiteDir
+            label="Select target folder", command=self.getWebsiteDir
         )
         self.menu.add_command(
             label=f"\tcurrent: {self.maker.websiteDir}", state="disabled"
@@ -563,7 +563,7 @@ class Gui:
         if self.maker.websiteDir is None:
             self.warning = tk.Label(
                 self.mainframe,
-                text="No dwengo-website folder selected!",
+                text="No target folder selected!",
                 font=("Sabon", 15),
                 fg="red",
             )
@@ -644,7 +644,7 @@ class Gui:
             return
 
     def insertImage(self):
-        self.textEditor.insert("insert", "![ image_description ]( /images/ )")
+        self.textEditor.insert("insert", "![ image_description ](/images/)")
 
     def insertLink(self):
         self.textEditor.insert("insert", "[ link_description ]( link )")
@@ -667,16 +667,22 @@ class ObjectMaker:
             return
 
         if self.object.type == "event":
-            if self.object.month >= 9:
-                p = os.path.join(
-                    self.eventDir, f"{self.object.year}" + "_najaar", filename + ".md"
-                )
+            if os.path.basename(self.websiteDir) == "Dwengo-Website":
+                if self.object.month >= 9:
+                    p = os.path.join(
+                        self.eventDir, f"{self.object.year}" + "_najaar", filename + ".md"
+                    )
+                else:
+                    p = os.path.join(
+                        self.eventDir, f"{self.object.year}" + "_voorjaar", filename + ".md"
+                    )
             else:
-                p = os.path.join(
-                    self.eventDir, f"{self.object.year}" + "_voorjaar", filename + ".md"
-                )
+                p = os.path.join(self.eventDir, filename + ".md")
         elif self.object.type == "news":
-            p = os.path.join(self.newsDir, f"{self.object.year}", filename + ".md")
+            if os.path.basename(self.websiteDir) == "Dwengo-Website":
+                p = os.path.join(self.newsDir, f"{self.object.year}", filename + ".md")
+            else:
+                p = os.path.join(self.newsDir, filename + ".md")
 
         preamble = self.object.makeDict()
         preambleYaml = yaml.dump(preamble)
@@ -709,6 +715,7 @@ class ObjectMaker:
         self.websiteDir = None
         self.eventDir = None
         self.newsDir = None
+        self.hasRepo = False
 
     def saveSettings(self):
         with open(self.settingsFile, "w") as f:
@@ -729,8 +736,12 @@ class ObjectMaker:
         dir = filedialog.askdirectory(mustexist=True)
         if dir != "":
             self.websiteDir = dir
-            self.eventDir = os.path.join(dir, "_events")
-            self.newsDir = os.path.join(dir, "_news")
+            if os.path.basename(self.websiteDir) == "Dwengo-Website":
+                self.eventDir = os.path.join(dir, "_events")
+                self.newsDir = os.path.join(dir, "_news")
+            else:
+                self.eventDir = os.path.join(dir, "events")
+                self.newsDir = os.path.join(dir, "news")
         self.saveSettings()
 
 
