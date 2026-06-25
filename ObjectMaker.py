@@ -7,12 +7,13 @@ from pathlib import Path
 from tkcalendar import Calendar
 from tkinter import ttk, filedialog
 
-VERSION = "v1.0.3"
+VERSION = "v1.0.5"
 RELEASE_URL = "https://api.github.com/repos/YenteP/News-and-event-maker/releases/latest"
 
 DEFAULT_FONT = ("Sabon", 18)
 OBJECT_CHOICES = ("news", "event")
 LANGUAGES = ("nl", "en")
+SOCIALS = ("true", "false")
 CATEGORIES = (
     "agriculture",
     "algorithms",
@@ -69,13 +70,30 @@ class WebObject:
 
     def makeDict(self):
         return {
-            "title": self.title,
-            "language": self.language,
-            "item_theme_logo_ur": self.category,
-            "anchor": self.anchor,
+            "title": str(self.title),
+            "language": str(self.language),
+            "item_theme_logo_ur": str(self.category),
+            "anchor": str(self.anchor),
             "date": self.date,
         }
 
+class NewsObject(WebObject):
+    def __init__(self, title, language, anchor, category, date, year, content, to_socials='false'):
+        super().__init__(title, language, anchor, category, date, year, content)
+        if to_socials == 'true':
+            self.to_socials = True
+        else:
+            self.to_socials = False
+
+    def makeDict(self):
+        return {
+            "title": str(self.title),
+            "language": str(self.language),
+            "item_theme_logo_ur": str(self.category),
+            "anchor": str(self.anchor),
+            "date": self.date,
+            "to_socials": self.to_socials
+        }
 
 class Event(WebObject):
     def __init__(
@@ -338,6 +356,24 @@ class Gui:
         dateEntry.grid(column=1, row=5, sticky="eW", padx=5, pady=5, columnspan=2)
         self.variableComponents.append(dateEntry)
 
+        # Socials
+        socialLabel = ttk.Label(self.mainframe, text=f"Post to socials:", font=DEFAULT_FONT)
+        socialLabel.grid(column=0, row=6, sticky="W", padx=5, pady=5)
+        self.variableComponents.append(socialLabel)
+
+        self.socials = tk.StringVar()
+        socialsBox = ttk.Combobox(
+            self.mainframe,
+            textvariable=self.socials,
+            values=SOCIALS,
+            font=DEFAULT_FONT,
+            state="readonly",
+            width=6,
+        )
+        socialsBox.current(0)
+        socialsBox.grid(column=1, row=6, padx=5, pady=5, columnspan=2, sticky="W")
+        socialsBox.bind("<<ComboboxSelected>>", self.removeHighlight)
+
         # Make object button
         makeButton = ttk.Button(
             self.mainframe, text="make object", command=self.makeNewsObject
@@ -478,7 +514,7 @@ class Gui:
         else:
             image = ""
 
-        object = WebObject(
+        object = NewsObject(
             title=self.title.get(),
             date=self.formattedDate,
             language=self.language.get(),
@@ -486,6 +522,7 @@ class Gui:
             category=image,
             year=self.year,
             content=self.textEditor.get("1.0", "end-1c"),
+            to_socials=self.socials.get()
         )
         self.maker.setObject(object)
         self.askFileName()
