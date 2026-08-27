@@ -10,3 +10,5 @@ After selecting the folder where the Dwengo website repository is cloned, the ap
 ## Installation
 
 Navigate to "Releases", select the latest release and download ObjectMaker.exe and updater.exe. These files are to be kept in the same folder in order for the auto-updater to work. Run ObjectMaker.exe to launch the application. If a newer version is available, it will update automatically. During this process, a terminal may pop up. Not to worry, it should close on its own and the updated app should launch.
+
+Build app from code: pyinstaller --onefile --windowed --add-data "styles;styles" objectmaker.py

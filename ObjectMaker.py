@@ -7,7 +7,7 @@ from pathlib import Path
 from tkcalendar import Calendar
 from tkinter import ttk, filedialog
 
-VERSION = "v1.0.5"
+VERSION = "v1.0.6"
 RELEASE_URL = "https://api.github.com/repos/YenteP/News-and-event-maker/releases/latest"
 
 DEFAULT_FONT = ("Sabon", 18)
@@ -72,7 +72,7 @@ class WebObject:
         return {
             "title": str(self.title),
             "language": str(self.language),
-            "item_theme_logo_ur": str(self.category),
+            "item_theme_logo_url": str(self.category),
             "anchor": str(self.anchor),
             "date": self.date,
         }
@@ -89,7 +89,7 @@ class NewsObject(WebObject):
         return {
             "title": str(self.title),
             "language": str(self.language),
-            "item_theme_logo_ur": str(self.category),
+            "item_theme_logo_url": str(self.category),
             "anchor": str(self.anchor),
             "date": self.date,
             "to_socials": self.to_socials
@@ -255,6 +255,21 @@ class Gui:
 
     def makeTextEditor(self):
         self.textEditor = tk.Text(self.mainframe, font=DEFAULT_FONT, undo=True)
+        default_text = """
+
+**Doelgroep:**
+
+**Wanneer:**
+
+**Locatie:** Het makersatelier van stadsbibliotheek De Krook: Miriam Makebaplein 1, 9000 Gent, gelijkvloers
+
+**Prijs:** Gratis
+
+**Meebrengen:** Laptop
+
+**Organisatie:** Dwengo
+        """
+        self.textEditor.insert("1.0", default_text)
         self.textEditor.bind("<Control-z>", lambda event: self.textEditor.edit_undo())
         self.textEditor.bind("<Control-y>", lambda event: self.textEditor.edit_redo())
         self.textEditor.grid(column=5, row=1, rowspan=11, columnspan=5)

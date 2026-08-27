@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['ObjectMaker.py'],
+    ['objectmaker.py'],
     pathex=[],
     binaries=[],
     datas=[('styles', 'styles')],
@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='ObjectMaker',
+    name='objectmaker',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
